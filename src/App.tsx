@@ -1,6 +1,4 @@
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
 
 import { runGalleryDl, type DownloadedFile } from "./runtime";
@@ -19,7 +17,6 @@ const GalleryDl: React.FC = () => {
         setFiles([]);
 
         try {
-            // public/gallery_dl.whl にファイルが配置されている想定
             const whlUrl = `${window.location.origin}/gallery_dl.whl`;
 
             const result = await runGalleryDl(url, whlUrl);
@@ -32,13 +29,11 @@ const GalleryDl: React.FC = () => {
         }
     };
 
-    // バイナリデータをブラウザでダウンロードさせる関数
     const saveFile = (file: DownloadedFile) => {
         const blob = new Blob([file.data]);
         const blobUrl = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = blobUrl;
-        // パスからファイル名のみを抽出
         a.download = file.name.split("/").pop() || "downloaded_file";
         document.body.appendChild(a);
         a.click();

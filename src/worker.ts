@@ -1,11 +1,31 @@
+// @ts-ignore
 import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.mjs";
+
+(function() {
+    const PROXY_PREFIX = "https://cors-anywhere.herokuapp.com/";
+    const originalOpen = XMLHttpRequest.prototype.open;
+
+    // @ts-ignore
+    XMLHttpRequest.prototype.open = function(method, url, ...args) {
+        let targetUrl = url;
+
+        if (typeof targetUrl === 'string' && targetUrl.startsWith('http')) {
+            if (!targetUrl.includes(PROXY_PREFIX) && !targetUrl.includes('cdn.jsdelivr.net')) {
+                targetUrl = PROXY_PREFIX + targetUrl;
+            }
+        }
+
+        // @ts-ignore
+        return originalOpen.apply(this, [method, targetUrl, ...args]);
+    };
+    console.log("XMLHttpRequest hooked for CORS proxy.");
+})();
 
 let pyodideReadyPromise = loadPyodide();
 
 self.onmessage = async (event) => {
-    // make sure loading is done
     const pyodide = await pyodideReadyPromise;
-    const { id, python, context, targetUrl } = event.data;
+    const { targetUrl } = event.data;
 
     await pyodide.loadPackage(["micropip"]);
     const micropip = pyodide.pyimport("micropip");
@@ -23,11 +43,10 @@ self.onmessage = async (event) => {
             import sys
             import pyodide_http
             import gallery_dl
-            # ネットワークブリッジの有効化
+
             pyodide_http.patch_all()
 
             # gallery-dl の引数をシミュレート
-            # [プログラム名, オプション..., ターゲットURL]
             sys.argv = [
                 "gallery-dl", 
                 "${targetUrl}"
@@ -36,9 +55,8 @@ self.onmessage = async (event) => {
             gallery_dl.main()
 
         except Exception:
-            # トレースバックを文字列として取得
             error_str = traceback.format_exc()
-            print(error_str) # ブラウザのコンソールに表示
-            raise # 再度送出してJS側でもキャッチしたい場合
+            print(error_str)
+            raise
     `);
 };
