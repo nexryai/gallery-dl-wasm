@@ -1,6 +1,6 @@
 {
     "name": "gallery-dl-wasm",
-    "image": "node:24-alpine",
+    "image": "node:24",
     "features": {
         "ghcr.io/devcontainers-extra/features/pnpm:2": {}
     },
