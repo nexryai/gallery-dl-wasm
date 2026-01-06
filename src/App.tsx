@@ -4,7 +4,7 @@ import "./App.css";
 import { runGalleryDl, type DownloadedFile } from "./runtime";
 
 const GalleryDl: React.FC = () => {
-    const [url, setUrl] = useState("https://www.reddit.com/r/HonkaiStarRail/comments/1q57nqp/returning_player_here_is_my_heroes_good_to_beat/");
+    const [url, setUrl] = useState("https://tenor.com/ja/view/hyacine-amphoreus-honkai-star-rail-hsr-gif-13255669653734151756");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [files, setFiles] = useState<DownloadedFile[]>([]);

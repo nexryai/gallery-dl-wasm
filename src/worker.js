@@ -1,27 +1,5 @@
 import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.mjs";
-
-const WORKER_ENDPOINT = "https://gallery-dl-wasm.nexryai.workers.dev/proxy?url=";
-
-(function() {
-    const originalOpen = XMLHttpRequest.prototype.open;
-    const originalSetRequestHeader = XMLHttpRequest.prototype.setRequestHeader;
-
-    XMLHttpRequest.prototype.open = function(method, url, ...args) {
-        let targetUrl = url;
-
-        if (typeof targetUrl === 'string' && targetUrl.startsWith('http')) {
-            if (!targetUrl.includes('cdn.jsdelivr.net') && !targetUrl.includes('pyodide.org')) {
-                targetUrl = WORKER_ENDPOINT + encodeURIComponent(targetUrl);
-            }
-        }
-
-        return originalOpen.apply(this, [method, targetUrl, ...args]);
-    };
-
-    XMLHttpRequest.prototype.setRequestHeader = function(header, value) {        
-        originalSetRequestHeader.apply(this, [`X-Proxy-${header}`, value]);
-    };
-})();
+import "./hook.js";
 
 let pyodideReadyPromise = loadPyodide();
 
