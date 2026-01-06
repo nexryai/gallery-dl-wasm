@@ -1,12 +1,12 @@
-import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.mjs";
+import { loadPyodide, version as pyodideVersion } from "pyodide";
 import "./hook.js";
 
-let pyodideReadyPromise = loadPyodide();
+async function initPyodide() {
+    const pyodide = await loadPyodide({
+        indexURL: `https://cdn.jsdelivr.net/pyodide/v${pyodideVersion}/full/`,
+    });
 
-self.onmessage = async (event) => {
-    const pyodide = await pyodideReadyPromise;
-    const { targetUrl } = event.data;
-
+    console.log("Initializing...");
     await pyodide.loadPackage(["micropip"]);
     const micropip = pyodide.pyimport("micropip");
 
@@ -15,6 +15,16 @@ self.onmessage = async (event) => {
     await micropip.install("sqlite3");
 
     await micropip.install("gallery-dl");
+
+    console.log("pyodide ready!");
+    return pyodide;
+}
+
+const pyodidePromise = initPyodide();
+
+self.onmessage = async (event) => {
+    const { targetUrl } = event.data;
+    const pyodide = await pyodidePromise;
 
     await pyodide.runPythonAsync(`
         import traceback

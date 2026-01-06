@@ -7,9 +7,10 @@ export interface DownloadedFile {
     data: Uint8Array;
 }
 
+const worker = new GalleryWorker();
+
 export function runGalleryDl(targetUrl: string, whlUrl: string): Promise<DownloadedFile[]> {
     return new Promise((resolve, reject) => {
-        const worker = new GalleryWorker();
         const id = crypto.randomUUID();
 
         worker.onmessage = (event) => {
