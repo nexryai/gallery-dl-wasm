@@ -1,13 +1,6 @@
 import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.mjs";
 
 const WORKER_ENDPOINT = "https://gallery-dl-wasm.nexryai.workers.dev/proxy?url=";
-const FORBIDDEN_HEADERS = [
-    "accept-encoding",
-    "user-agent",
-    "referer",
-    "cookie",
-    "host"
-];
 
 (function() {
     const originalOpen = XMLHttpRequest.prototype.open;
@@ -25,14 +18,8 @@ const FORBIDDEN_HEADERS = [
         return originalOpen.apply(this, [method, targetUrl, ...args]);
     };
 
-    XMLHttpRequest.prototype.setRequestHeader = function(header, value) {
-        const lowerHeader = header.toLowerCase();
-        
-        if (FORBIDDEN_HEADERS.includes(lowerHeader)) {
-            originalSetRequestHeader.apply(this, [`X-Proxy-${header}`, value]);
-        } else {
-            originalSetRequestHeader.apply(this, [header, value]);
-        }
+    XMLHttpRequest.prototype.setRequestHeader = function(header, value) {        
+        originalSetRequestHeader.apply(this, [`X-Proxy-${header}`, value]);
     };
 })();
 

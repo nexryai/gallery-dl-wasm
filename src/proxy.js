@@ -40,8 +40,6 @@ export default class extends WorkerEntrypoint {
                     // "x-proxy-accept-encoding" -> "accept-encoding"
                     const originalKey = key.substring(7);
                     reqHeaders.set(originalKey, value);
-                } else if (!lowerKey.startsWith("x-") && lowerKey !== "host") {
-                    reqHeaders.set(key, value);
                 }
             }
 
