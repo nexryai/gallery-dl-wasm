@@ -45,6 +45,7 @@ export default class extends WorkerEntrypoint {
             const response = await fetch(modifiedRequest);
 
             const resHeaders = new Headers(response.headers);
+            resHeaders.set("Access-Control-Allow-Origin", "https://*.app.github.dev");
             resHeaders.delete("Content-Security-Policy");
 
             return new Response(response.body, {
