@@ -1,0 +1,11 @@
+{
+    "name": "gallery-dl-wasm",
+    "compatibility_date": "2026-01-06",
+    "main": "./src/proxy.js",
+    "assets": {
+        "directory": "./dist",
+        "not_found_handling": "single-page-application",
+        "binding": "ASSETS",
+        "run_worker_first": ["/proxy"]
+    }
+}
