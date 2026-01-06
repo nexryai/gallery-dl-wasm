@@ -3,26 +3,95 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 
-function App() {
-    const [count, setCount] = useState(0);
+import { runGalleryDl, type DownloadedFile } from "./runtime";
+
+const GalleryDl: React.FC = () => {
+    const [url, setUrl] = useState("https://www.reddit.com/r/HonkaiStarRail/comments/1q57nqp/returning_player_here_is_my_heroes_good_to_beat/");
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [files, setFiles] = useState<DownloadedFile[]>([]);
+
+    const handleDownload = async () => {
+        if (!url) return;
+
+        setIsLoading(true);
+        setError(null);
+        setFiles([]);
+
+        try {
+            // public/gallery_dl.whl にファイルが配置されている想定
+            const whlUrl = `${window.location.origin}/gallery_dl.whl`;
+
+            const result = await runGalleryDl(url, whlUrl);
+            setFiles(result);
+        } catch (err: any) {
+            console.error(err);
+            setError(err.message || "実行中にエラーが発生しました。");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // バイナリデータをブラウザでダウンロードさせる関数
+    const saveFile = (file: DownloadedFile) => {
+        const blob = new Blob([file.data]);
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        // パスからファイル名のみを抽出
+        a.download = file.name.split("/").pop() || "downloaded_file";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+    };
 
     return (
-        <>
+        <div style={{ padding: "20px", maxWidth: "600px", margin: "0 auto" }}>
+            <h2>gallery-dl Web Runner</h2>
+
             <div>
-                <a href="https://vite.dev" target="_blank">
-                    <img src={viteLogo} className="logo" alt="Vite logo" />
-                </a>
-                <a href="https://react.dev" target="_blank">
-                    <img src={reactLogo} className="logo react" alt="React logo" />
-                </a>
+
+                <div style={{ marginBottom: "10px" }}>
+                    <input type="text" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="ターゲットURLを入力 (例: https://...)" style={{ width: "80%", padding: "8px" }} disabled={isLoading} />
+                    <button onClick={handleDownload} disabled={isLoading || !url} style={{ padding: "8px 16px", marginLeft: "5px" }}>
+                        {isLoading ? "実行中..." : "解析開始"}
+                    </button>
+                </div>
+
+                {isLoading && <p style={{ color: "#666" }}>Pyodideを初期化し、gallery-dlを実行しています。これには数十秒かかる場合があります...</p>}
+
+                {error && (
+                    <div style={{ color: "red", padding: "10px", border: "1px solid red", borderRadius: "4px" }}>
+                        <strong>Error:</strong> {error}
+                    </div>
+                )}
+
+                {files.length > 0 && (
+                    <div style={{ marginTop: "20px" }}>
+                        <h3>取得済みファイル ({files.length}件)</h3>
+                        <ul style={{ listStyle: "none", padding: 0 }}>
+                            {files.map((file, index) => (
+                                <li key={index} style={{ marginBottom: "5px", borderBottom: "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <span style={{ fontSize: "0.9rem", wordBreak: "break-all" }}>{file.name}</span>
+                                    <button onClick={() => saveFile(file)} style={{ marginLeft: "10px" }}>
+                                        保存
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
             </div>
+        </div>
+    );
+};
+
+function App() {
+    return (
+        <>
             <h1>Vite + React</h1>
-            <div className="card">
-                <button onClick={() => setCount((count) => count + 1)}>count is {count}</button>
-                <p>
-                    Edit <code>src/App.tsx</code> and save to test HMR
-                </p>
-            </div>
+            <GalleryDl />
             <p className="read-the-docs">Click on the Vite and React logos to learn more</p>
         </>
     );
