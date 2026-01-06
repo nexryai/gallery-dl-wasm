@@ -26,6 +26,18 @@ export default class extends WorkerEntrypoint {
             });
         }
 
+        // return 200 if reqeust method is OPTIONS
+        if (request.method === "OPTIONS") {
+            return new Response("OK", { 
+                status: 200,
+                headers: {
+                    "Access-Control-Allow-Origin": requestOrigin,
+                    "Access-Control-Allow-Methods": "*",
+                    "Access-Control-Allow-Headers": "*",
+                }
+            });
+        }
+
         const targetUrl = url.searchParams.get("url");
         if (!targetUrl) {
             return new Response("Missing 'url' parameter", { 
