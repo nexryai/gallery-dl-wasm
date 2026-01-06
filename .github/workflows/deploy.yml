@@ -8,7 +8,7 @@ permissions: {}
 
 jobs:
   build:
-    name: Build
+    name: Deploy to Cloudflare Workers
     runs-on: ubuntu-latest
     permissions:
       contents: read
