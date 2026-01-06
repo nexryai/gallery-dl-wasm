@@ -11,7 +11,6 @@ export default class extends WorkerEntrypoint {
         const url = new URL(request.url);
 
         const targetUrl = url.searchParams.get("url");
-
         if (!targetUrl) {
             return new Response("Missing 'url' parameter", { status: 400 });
         }
@@ -24,24 +23,34 @@ export default class extends WorkerEntrypoint {
                 return new Response("Access to this domain is not allowed", { status: 403 });
             }
 
+            const reqHeaders = new Headers();
+            for (const [key, value] of request.headers.entries()) {
+                const lowerKey = key.toLowerCase();
+                
+                if (lowerKey.startsWith("x-proxy-")) {
+                    // "x-proxy-accept-encoding" -> "accept-encoding"
+                    const originalKey = key.substring(7);
+                    reqHeaders.set(originalKey, value);
+                } else if (!lowerKey.startsWith("x-") && lowerKey !== "host") {
+                    reqHeaders.set(key, value);
+                }
+            }
+
             const modifiedRequest = new Request(targetUrl, {
                 method: request.method,
-                headers: request.headers,
+                headers: reqHeaders,
                 redirect: "follow",
             });
 
             const response = await fetch(modifiedRequest);
 
-            const newHeaders = new Headers(response.headers);
-            newHeaders.set("Access-Control-Allow-Origin", "*");
-            newHeaders.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-            newHeaders.set("Access-Control-Allow-Headers", "*");
-            newHeaders.delete("Content-Security-Policy");
+            const resHeaders = new Headers(response.headers);
+            resHeaders.delete("Content-Security-Policy");
 
             return new Response(response.body, {
                 status: response.status,
                 statusText: response.statusText,
-                headers: newHeaders,
+                headers: resHeaders,
             });
         } catch (e) {
             return new Response("Invalid URL format", { status: 400 });

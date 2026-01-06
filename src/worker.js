@@ -1,8 +1,17 @@
 import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.mjs";
 
+const FORBIDDEN_HEADERS = [
+    "accept-encoding",
+    "user-agent",
+    "referer",
+    "cookie",
+    "host"
+];
+
 (function() {
     const WORKER_ENDPOINT = "https://gallery-dl-wasm.nexryai.workers.dev/proxy?url=";
     const originalOpen = XMLHttpRequest.prototype.open;
+    const originalSetRequestHeader = XMLHttpRequest.prototype.setRequestHeader;
 
     XMLHttpRequest.prototype.open = function(method, url, ...args) {
         let targetUrl = url;
@@ -14,6 +23,16 @@ import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodi
         }
 
         return originalOpen.apply(this, [method, targetUrl, ...args]);
+    };
+
+    XMLHttpRequest.prototype.setRequestHeader = function(header, value) {
+        const lowerHeader = header.toLowerCase();
+        
+        if (FORBIDDEN_HEADERS.includes(lowerHeader)) {
+            originalSetRequestHeader.apply(this, [`X-Proxy-${header}`, value]);
+        } else {
+            originalSetRequestHeader.apply(this, [header, value]);
+        }
     };
 })();
 
