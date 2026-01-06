@@ -1,6 +1,9 @@
 # gallery-dl wasm
 Easy-to-use gallery-dl GUI that runs in your browser, powered by WASM
 
+<img width="1361" height="923" alt="image" src="https://github.com/user-attachments/assets/eb9f246b-9dd9-4d7e-ae49-dbcdbcfdcf39" />
+
+
 - Easily deploys to Cloudflare Workers.
 - Most processing is performed in the browser using WASM, so the server script simply proxies requests to avoid CORS errors. The server-side script is ultra-lightweight and not subject to Cloudflare Workers' CPU time limitations.
 - Seamlessly saves downloaded files locally using the File System Access API.
