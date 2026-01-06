@@ -14,13 +14,14 @@ const CORS_ALLOWED_DOMAINS = [
 export default class extends WorkerEntrypoint {
     async fetch(request) {
         const url = new URL(request.url);
+        const thisHost = request.headers.get("Host");
 
         const requestOrigin = request.headers.get("Origin");
         if (requestOrigin && !CORS_ALLOWED_DOMAINS.some(domain => requestOrigin.endsWith(domain))) {
             return new Response("Not allowed origin", { 
                 status: 403,
                 headers: {
-                    "Access-Control-Allow-Origin": requestOrigin,
+                    "Access-Control-Allow-Origin": requestOrigin ?? `https://${thisHost}`,
                     "Access-Control-Allow-Methods": "*",
                     "Access-Control-Allow-Headers": "*",
                 }
@@ -32,7 +33,7 @@ export default class extends WorkerEntrypoint {
             return new Response("OK", { 
                 status: 200,
                 headers: {
-                    "Access-Control-Allow-Origin": requestOrigin,
+                    "Access-Control-Allow-Origin": requestOrigin ?? `https://${thisHost}`,
                     "Access-Control-Allow-Methods": "*",
                     "Access-Control-Allow-Headers": "*",
                 }
@@ -44,7 +45,7 @@ export default class extends WorkerEntrypoint {
             return new Response("Missing 'url' parameter", { 
                 status: 400,
                 headers: {
-                    "Access-Control-Allow-Origin": requestOrigin,
+                    "Access-Control-Allow-Origin": requestOrigin ?? `https://${thisHost}`,
                     "Access-Control-Allow-Methods": "*",
                     "Access-Control-Allow-Headers": "*",
                 }
@@ -59,7 +60,7 @@ export default class extends WorkerEntrypoint {
                 return new Response("Access to this domain is not allowed", { 
                     status: 403,
                     headers: {
-                        "Access-Control-Allow-Origin": requestOrigin,
+                        "Access-Control-Allow-Origin": requestOrigin ?? `https://${thisHost}`,
                         "Access-Control-Allow-Methods": "*",
                         "Access-Control-Allow-Headers": "*",
                     }
@@ -86,7 +87,7 @@ export default class extends WorkerEntrypoint {
             const response = await fetch(modifiedRequest);
 
             const resHeaders = new Headers(response.headers);
-            resHeaders.set("Access-Control-Allow-Origin", requestOrigin);
+            resHeaders.set("Access-Control-Allow-Origin", requestOrigin ?? `https://${thisHost}`);
             resHeaders.set("Access-Control-Allow-Methods", "*");
             resHeaders.set("Access-Control-Allow-Headers", "*");
             resHeaders.delete("Content-Security-Policy");
@@ -100,7 +101,7 @@ export default class extends WorkerEntrypoint {
             return new Response("Invalid URL", { 
                 status: 400,
                 headers: {
-                    "Access-Control-Allow-Origin": requestOrigin,
+                    "Access-Control-Allow-Origin": requestOrigin ?? `https://${thisHost}`,
                     "Access-Control-Allow-Methods": "*",
                     "Access-Control-Allow-Headers": "*",
                 }
