@@ -55,6 +55,8 @@ export default class extends WorkerEntrypoint {
 
             const resHeaders = new Headers(response.headers);
             resHeaders.set("Access-Control-Allow-Origin", requestOrigin);
+            resHeaders.set("Access-Control-Allow-Methods", "*");
+            resHeaders.set("Access-Control-Allow-Headers", "*");
             resHeaders.delete("Content-Security-Policy");
 
             return new Response(response.body, {
