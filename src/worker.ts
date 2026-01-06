@@ -1,6 +1,16 @@
 import { loadPyodide, version as pyodideVersion } from "pyodide";
 import "./hook.js";
 
+async function getDataDirectoryHandle() {
+    const root = await navigator.storage.getDirectory();
+    return root.getDirectoryHandle("data", { create: true });
+}
+
+async function getFallbackOutDirectoryHandle() {
+    const root = await navigator.storage.getDirectory();
+    return root.getDirectoryHandle("out", { create: true });
+}
+
 async function initPyodide() {
     const pyodide = await loadPyodide({
         indexURL: `https://cdn.jsdelivr.net/pyodide/v${pyodideVersion}/full/`,
@@ -20,11 +30,28 @@ async function initPyodide() {
     return pyodide;
 }
 
+const dataDirectoryHandlePromise = getDataDirectoryHandle();
 const pyodidePromise = initPyodide();
 
 self.onmessage = async (event) => {
-    const { targetUrl } = event.data;
+    const {
+        id,
+        targetUrl,
+        outDirectoryHandle,
+    }: {
+        id: string;
+        targetUrl: string;
+        outDirectoryHandle?: FileSystemDirectoryHandle;
+    } = event.data;
+
+    if (!targetUrl) {
+        return;
+    }
+
     const pyodide = await pyodidePromise;
+
+    await pyodide.mountNativeFS("/gallery-dl", outDirectoryHandle ?? (await getFallbackOutDirectoryHandle()));
+    await pyodide.mountNativeFS("/data", await dataDirectoryHandlePromise);
 
     await pyodide.runPythonAsync(`
         import traceback
@@ -49,4 +76,9 @@ self.onmessage = async (event) => {
             print(error_str)
             raise
     `);
+
+    self.postMessage({
+        id: id,
+        success: true,
+    });
 };

@@ -1,42 +1,25 @@
 import { useState } from "react";
-import { runGalleryDl, type DownloadedFile } from "./runtime";
+import { runGalleryDl } from "./runtime";
 
 const GalleryDl: React.FC = () => {
     const [url, setUrl] = useState("https://tenor.com/ja/view/hyacine-amphoreus-honkai-star-rail-hsr-gif-13255669653734151756");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [files, setFiles] = useState<DownloadedFile[]>([]);
 
     const handleDownload = async () => {
         if (!url) return;
 
         setIsLoading(true);
         setError(null);
-        setFiles([]);
 
         try {
-            const whlUrl = `${window.location.origin}/gallery_dl.whl`;
-            const result = await runGalleryDl(url, whlUrl);
-            setFiles(result);
+            await runGalleryDl(url);
         } catch (err: any) {
             console.error(err);
             setError(err.message || "An error occurred during execution.");
         } finally {
             setIsLoading(false);
         }
-    };
-
-    const saveFile = (file: DownloadedFile) => {
-        // @ts-ignore
-        const blob = new Blob([file.data]);
-        const blobUrl = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = blobUrl;
-        a.download = file.name.split("/").pop() || "downloaded_file";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(blobUrl);
     };
 
     return (
@@ -83,25 +66,6 @@ const GalleryDl: React.FC = () => {
                     {error && (
                         <div className="bg-[#e0e5ec] rounded-2xl p-6 shadow-[8px_8px_16px_#fca5a5,-8px_-8px_16px_#ffffff] border border-red-100 transition-all duration-300">
                             <p className="text-red-400 font-semibold text-center">{error}</p>
-                        </div>
-                    )}
-
-                    {files.length > 0 && (
-                        <div className="pt-2 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                            <h3 className="text-lg font-bold text-gray-400 mb-6 px-2 uppercase tracking-wider text-center">Downloaded Files ({files.length})</h3>
-                            <div className="space-y-6">
-                                {files.map((file, index) => (
-                                    <div key={index} className="bg-[#e0e5ec] rounded-2xl p-5 shadow-[6px_6px_12px_#bec8d4,-6px_-6px_12px_#ffffff] flex flex-col sm:flex-row justify-between items-center gap-4 transition-all duration-300 hover:shadow-[10px_10px_20px_#bec8d4,-10px_-10px_20px_#ffffff]">
-                                        <span className="text-gray-500 text-sm font-semibold truncate w-full sm:flex-1">{file.name}</span>
-                                        <button
-                                            onClick={() => saveFile(file)}
-                                            className="w-full sm:w-auto bg-[#e0e5ec] text-gray-400 text-xs font-black py-2 px-6 rounded-xl shadow-[4px_4px_8px_#bec8d4,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#bec8d4,inset_-2px_-2px_4px_#ffffff] transition-all duration-200 hover:text-gray-500 transform active:scale-95"
-                                        >
-                                            SAVE
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
                         </div>
                     )}
                 </div>
