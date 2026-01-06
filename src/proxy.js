@@ -4,6 +4,7 @@ const ALLOWED_DOMAINS = [
   "x.com",
   "reddit.com",
   "redd.it",
+  "tenor.com"
 ];
 
 const CORS_ALLOWED_DOMAINS = [
