@@ -1,14 +1,33 @@
 {
     "name": "gallery-dl-wasm",
-    "image": "node:24-alpine",
+    "image": "alpine:edge",
+    "features": {
+        "ghcr.io/MuhmdRaouf/devcontainers-features/alpine-apk:0": {
+            "packages": "nushell,curl,git,nodejs,pnpm",
+            "upgradePackages": true
+        },
+        "ghcr.io/bartventer/arch-devcontainer-features/common-utils:1": {
+            "username": "runner",
+            "userUid": "1000",
+            "userGid": "1000",
+            "configureZshAsDefaultShell": false
+        }
+    },
     "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
     "workspaceFolder": "/workspace",
-    "remoteUser": "node",
+    "remoteUser": "runner",
     "overrideCommand": true,
     "customizations": {
         "vscode": {
             "extensions": ["biomejs.biome", "bradlc.vscode-tailwindcss"],
             "settings": {
+                "terminal.integrated.profiles.linux": {
+                    "nushell": {
+                        "path": "/usr/bin/nu"
+                    }
+                },
+                "terminal.integrated.defaultProfile.linux": "nushell",
+                
                 "editor.linkedEditing": true,
                 "editor.formatOnPaste": true,
                 "editor.formatOnSave": true,
