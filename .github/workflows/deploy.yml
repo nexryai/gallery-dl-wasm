@@ -1,7 +1,7 @@
 name: Workers deploy CI
 on:
   push:
-    branches: ["nightly"]
+    branches: ["main"]
 
 permissions: {}
 
