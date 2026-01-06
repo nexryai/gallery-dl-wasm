@@ -12,5 +12,7 @@ pnpm install
 pnpm build
 
 # Deplot to Cloudflare Workers with wrangler
-CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id CLOUDFLARE_API_TOKEN=super_secret_token pnpm run deploy
+export CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id
+export CLOUDFLARE_API_TOKEN=super_secret_token
+pnpm run deploy
 ```
