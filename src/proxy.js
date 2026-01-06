@@ -1,6 +1,6 @@
 import { WorkerEntrypoint } from "cloudflare:workers";
 
-const ALLOWED_DOMAINS = ["x.com", "reddit.com", "redd.it", "miyoushe.com", "tenor.com"];
+const ALLOWED_DOMAINS = ["x.com", "reddit.com", "redd.it", "miyoushe.com", "tenor.com", "pixiv.net", "pximg.net"];
 
 const CORS_ALLOWED_DOMAINS = [".app.github.dev"];
 
