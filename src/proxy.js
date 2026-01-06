@@ -15,7 +15,7 @@ export default class extends WorkerEntrypoint {
         const url = new URL(request.url);
 
         const requestOrigin = request.headers.get("Origin");
-        if (requestOrigin && !CORS_ALLOWED_DOMAINS.some(domain => requestOrigin.endsWith(domain))) {
+        if (!CORS_ALLOWED_DOMAINS.some(domain => requestOrigin?.endsWith(domain))) {
             return new Response("Not allowed origin", { status: 403 });
         }
 
