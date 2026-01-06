@@ -1,19 +1,81 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { runGalleryDl } from "./runtime";
 
 const GalleryDl: React.FC = () => {
     const [url, setUrl] = useState("https://tenor.com/ja/view/hyacine-amphoreus-honkai-star-rail-hsr-gif-13255669653734151756");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+    const [configContent, setConfigContent] = useState('{\n    "extractor": {\n        "base-directory": "/gallery-dl/"\n    }\n}');
+
+    useEffect(() => {
+        const loadConfig = async () => {
+            try {
+                const root = await navigator.storage.getDirectory();
+                const dataDir = await root.getDirectoryHandle("data", { create: true });
+                const configFile = await dataDir.getFileHandle("gallery-dl.conf", { create: true });
+                const file = await configFile.getFile();
+                const text = await file.text();
+                if (text) setConfigContent(text);
+            } catch (e) {
+                console.error(e);
+            }
+        };
+        loadConfig();
+    }, []);
+
+    const handleSaveConfig = async () => {
+        try {
+            const root = await navigator.storage.getDirectory();
+            const dataDir = await root.getDirectoryHandle("data", { create: true });
+            const configFile = await dataDir.getFileHandle("gallery-dl.conf", { create: true });
+            const writable = await configFile.createWritable();
+
+            let dataToSave: any;
+            try {
+                dataToSave = JSON.parse(configContent);
+            } catch {
+                dataToSave = configContent;
+            }
+
+            await writable.write(typeof dataToSave === "string" ? dataToSave : JSON.stringify(dataToSave, null, 4));
+            await writable.close();
+            setIsConfigModalOpen(false);
+        } catch (err: any) {
+            setError(err.message);
+        }
+    };
 
     const handleDownload = async () => {
         if (!url) return;
+
+        let directoryHandle: FileSystemDirectoryHandle | undefined;
+
+        if ("showDirectoryPicker" in window) {
+            try {
+                directoryHandle = await (window as any).showDirectoryPicker({
+                    mode: "readwrite",
+                });
+
+                // @ts-ignore
+                const permissionStatus = await directoryHandle?.requestPermission({
+                    mode: "readwrite",
+                });
+
+                if (permissionStatus !== "granted") {
+                    throw new Error("readwrite access to directory not granted");
+                }
+            } catch (err: any) {
+                if (err.name === "AbortError") return;
+                console.error(err);
+            }
+        }
 
         setIsLoading(true);
         setError(null);
 
         try {
-            await runGalleryDl(url);
+            await runGalleryDl(url, directoryHandle);
         } catch (err: any) {
             console.error(err);
             setError(err.message || "An error occurred during execution.");
@@ -27,12 +89,14 @@ const GalleryDl: React.FC = () => {
             <div className="bg-[#e0e5ec] rounded-[50px] p-8 md:p-12 shadow-[20px_20px_60px_#bec8d4,-20px_-20px_60px_#ffffff] transition-all duration-500 ease-in-out">
                 <div className="flex items-center justify-between mb-10">
                     <span className="text-xl font-semibold text-gray-500 tracking-tight">Download from URL</span>
-                    <div className="p-2 rounded-full bg-[#e0e5ec] shadow-[4px_4px_8px_#bec8d4,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#bec8d4,inset_-2px_-2px_4px_#ffffff] transition-all duration-300 text-gray-500 hover:text-gray-700 transform hover:scale-110 active:scale-90">
-                        {/* Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc. */}
+                    <button
+                        onClick={() => setIsConfigModalOpen(true)}
+                        className="p-2 rounded-full bg-[#e0e5ec] shadow-[4px_4px_8px_#bec8d4,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#bec8d4,inset_-2px_-2px_4px_#ffffff] transition-all duration-300 text-gray-500 hover:text-gray-700 transform hover:scale-110 active:scale-90"
+                    >
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="w-6 h-6 fill-current">
                             <path d="M195.1 9.5C198.1-5.3 211.2-16 226.4-16l59.8 0c15.2 0 28.3 10.7 31.3 25.5L332 79.5c14.1 6 27.3 13.7 39.3 22.8l67.8-22.5c14.4-4.8 30.2 1.2 37.8 14.4l29.9 51.8c7.6 13.2 4.9 29.8-6.5 39.9L447 233.3c.9 7.4 1.3 15 1.3 22.7s-.5 15.3-1.3 22.7l53.4 47.5c11.4 10.1 14 26.8 6.5 39.9l-29.9 51.8c-7.6 13.1-23.4 19.2-37.8 14.4l-67.8-22.5c-12.1 9.1-25.3 16.7-39.3 22.8l-14.4 69.9c-3.1 14.9-16.2 25.5-31.3 25.5l-59.8 0c-15.2 0-28.3-10.7-31.3-25.5l-14.4-69.9c-14.1-6-27.2-13.7-39.3-22.8L73.5 432.3c-14.4 4.8-30.2-1.2-37.8-14.4L5.8 366.1c-7.6-13.2-4.9-29.8 6.5-39.9l53.4-47.5c-.9-7.4-1.3-15-1.3-22.7s.5-15.3 1.3-22.7L12.3 185.8c-11.4-10.1-14-26.8-6.5-39.9L35.7 94.1c7.6-13.2 23.4-19.2 37.8-14.4l67.8 22.5c12.1-9.1 25.3-16.7 39.3-22.8L195.1 9.5zM256.3 336a80 80 0 1 0 -.6-160 80 80 0 1 0 .6 160z" />
                         </svg>
-                    </div>
+                    </button>
                 </div>
                 <div className="space-y-10">
                     <div className="flex flex-col gap-6">
@@ -49,7 +113,7 @@ const GalleryDl: React.FC = () => {
                             disabled={isLoading || !url}
                             className="w-full bg-[#e0e5ec] text-gray-500 py-4 rounded-2xl shadow-[8px_8px_16px_#bec8d4,-8px_-8px_16px_#ffffff] hover:text-gray-600 active:shadow-[inset_6px_6px_12px_#bec8d4,inset_-6px_-6px_12px_#ffffff] transition-all duration-300 ease-in-out disabled:opacity-40 disabled:pointer-events-none transform active:scale-[0.98]"
                         >
-                            {isLoading ? "Running..." : "Start Downloading"}
+                            {isLoading ? "Running..." : "Select Folder & Download"}
                         </button>
                     </div>
 
@@ -70,6 +134,40 @@ const GalleryDl: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            {isConfigModalOpen && (
+                <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-[#e0e5ec] w-full max-w-lg rounded-[40px] p-8 relative overflow-hidden">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-lg font-bold text-gray-500 uppercase tracking-widest">Settings</h2>
+                            <button onClick={() => setIsConfigModalOpen(false)} className="p-2 rounded-full bg-[#e0e5ec] shadow-[4px_4px_8px_#bec8d4,-4px_-4px_8px_#ffffff] active:shadow-[inset_2px_2px_4px_#bec8d4,inset_-2px_-2px_4px_#ffffff] transition-all duration-300 text-gray-400 hover:text-gray-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-2">Gallery-dl Config (JSON)</label>
+                                <textarea
+                                    value={configContent}
+                                    onChange={(e) => setConfigContent(e.target.value)}
+                                    className="w-full h-64 bg-[#e0e5ec] rounded-2xl p-4 text-xs font-mono text-gray-600 outline-none shadow-[inset_6px_6px_12px_#bec8d4,inset_-6px_-6px_12px_#ffffff] transition-all duration-300 focus:shadow-[inset_8px_8px_16px_#bec8d4,inset_-8px_-8px_16px_#ffffff]"
+                                    spellCheck={false}
+                                />
+                            </div>
+
+                            <button
+                                onClick={handleSaveConfig}
+                                className="w-full bg-[#e0e5ec] text-gray-500 font-bold py-4 rounded-2xl shadow-[8px_8px_16px_#bec8d4,-8px_-8px_16px_#ffffff] active:shadow-[inset_6px_6px_12px_#bec8d4,inset_-6px_-6px_12px_#ffffff] transition-all duration-300 uppercase tracking-widest text-sm hover:text-gray-600"
+                            >
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

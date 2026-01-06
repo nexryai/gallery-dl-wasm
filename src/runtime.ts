@@ -1,4 +1,3 @@
-// @ts-ignore: Vite handles ?worker
 import GalleryWorker from "./worker.ts?worker";
 
 import "./hook.js";
@@ -10,7 +9,7 @@ export interface DownloadedFile {
 
 const worker = new GalleryWorker();
 
-export function runGalleryDl(targetUrl: string): Promise<void> {
+export function runGalleryDl(targetUrl: string, outDirectoryHandle?: FileSystemDirectoryHandle): Promise<void> {
     return new Promise((resolve, reject) => {
         const id = crypto.randomUUID();
 
@@ -29,7 +28,6 @@ export function runGalleryDl(targetUrl: string): Promise<void> {
             reject(err);
         };
 
-        // 実行開始
-        worker.postMessage({ id, targetUrl });
+        worker.postMessage({ id, targetUrl, outDirectoryHandle });
     });
 }

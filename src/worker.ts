@@ -16,17 +16,14 @@ async function initPyodide() {
         indexURL: `https://cdn.jsdelivr.net/pyodide/v${pyodideVersion}/full/`,
     });
 
-    console.log("Initializing...");
     await pyodide.loadPackage(["micropip"]);
     const micropip = pyodide.pyimport("micropip");
 
     await micropip.install("pyodide-http");
     await micropip.install("ssl");
     await micropip.install("sqlite3");
-
     await micropip.install("gallery-dl");
 
-    console.log("pyodide ready!");
     return pyodide;
 }
 
@@ -50,24 +47,28 @@ self.onmessage = async (event) => {
 
     const pyodide = await pyodidePromise;
 
-    await pyodide.mountNativeFS("/gallery-dl", outDirectoryHandle ?? (await getFallbackOutDirectoryHandle()));
+    console.log(outDirectoryHandle);
+    const outDirectory = await pyodide.mountNativeFS("/gallery-dl", outDirectoryHandle ?? (await getFallbackOutDirectoryHandle()));
     await pyodide.mountNativeFS("/data", await dataDirectoryHandlePromise);
 
     await pyodide.runPythonAsync(`
         import traceback
+        import sys
+        import os
+        import pyodide_http
+        import gallery_dl
 
         try:
-            import sys
-            import pyodide_http
-            import gallery_dl
-
             pyodide_http.patch_all()
 
-            # gallery-dl の引数をシミュレート
-            sys.argv = [
-                "gallery-dl", 
-                "${targetUrl}"
-            ]
+            config_path = "/data/gallery-dl.conf"
+            args = ["gallery-dl"]
+            
+            if os.path.exists(config_path):
+                args.extend(["-c", config_path])
+            
+            args.append("${targetUrl}")
+            sys.argv = args
 
             gallery_dl.main()
 
@@ -76,6 +77,8 @@ self.onmessage = async (event) => {
             print(error_str)
             raise
     `);
+
+    await outDirectory.syncfs();
 
     self.postMessage({
         id: id,
