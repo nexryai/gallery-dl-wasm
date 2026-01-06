@@ -6,9 +6,18 @@ const ALLOWED_DOMAINS = [
   "redd.it",
 ];
 
+const CORS_ALLOWED_DOMAINS = [
+    ".app.github.dev"
+]
+
 export default class extends WorkerEntrypoint {
     async fetch(request) {
         const url = new URL(request.url);
+
+        const requestOrigin = request.headers.get("Origin");
+        if (!CORS_ALLOWED_DOMAINS.some(domain => requestOrigin?.endsWith(domain))) {
+            return new Response("Not allowed origin", { status: 403 });
+        }
 
         const targetUrl = url.searchParams.get("url");
         if (!targetUrl) {
@@ -45,7 +54,7 @@ export default class extends WorkerEntrypoint {
             const response = await fetch(modifiedRequest);
 
             const resHeaders = new Headers(response.headers);
-            resHeaders.set("Access-Control-Allow-Origin", "https://*.app.github.dev");
+            resHeaders.set("Access-Control-Allow-Origin", requestOrigin);
             resHeaders.delete("Content-Security-Policy");
 
             return new Response(response.body, {

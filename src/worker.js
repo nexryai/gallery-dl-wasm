@@ -1,5 +1,6 @@
 import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.mjs";
 
+const WORKER_ENDPOINT = "https://gallery-dl-wasm.nexryai.workers.dev/proxy?url=";
 const FORBIDDEN_HEADERS = [
     "accept-encoding",
     "user-agent",
@@ -9,7 +10,6 @@ const FORBIDDEN_HEADERS = [
 ];
 
 (function() {
-    const WORKER_ENDPOINT = "https://gallery-dl-wasm.nexryai.workers.dev/proxy?url=";
     const originalOpen = XMLHttpRequest.prototype.open;
     const originalSetRequestHeader = XMLHttpRequest.prototype.setRequestHeader;
 
