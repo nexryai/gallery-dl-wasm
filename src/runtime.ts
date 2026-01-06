@@ -22,14 +22,10 @@ export function runGalleryDl(targetUrl: string, whlUrl: string): Promise<Downloa
             } else {
                 reject(new Error(error));
             }
-
-            // 完了後にWorkerを終了させる
-            worker.terminate();
         };
 
         worker.onerror = (err) => {
             reject(err);
-            worker.terminate();
         };
 
         // 実行開始
