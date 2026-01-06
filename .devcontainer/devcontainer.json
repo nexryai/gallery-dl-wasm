@@ -1,50 +1,50 @@
 {
-	"name": "gallery-dl-wasm",
-	"build": {
-		"dockerfile": "./Dockerfile"
-	},
-	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
-	"workspaceFolder": "/workspace",
-	"remoteUser": "runner",
-	"overrideCommand": true,
-	"customizations": {
-		"vscode": {
-			"extensions": ["biomejs.biome", "bradlc.vscode-tailwindcss"],
-			"settings": {
-				"terminal.integrated.profiles.linux": {
-					"nushell": {
-						"path": "/usr/bin/nu"
-					}
-				},
-				"terminal.integrated.defaultProfile.linux": "nushell",
+    "name": "gallery-dl-wasm",
+    "build": {
+        "dockerfile": "./Dockerfile"
+    },
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+    "workspaceFolder": "/workspace",
+    "remoteUser": "runner",
+    "overrideCommand": true,
+    "customizations": {
+        "vscode": {
+            "extensions": ["biomejs.biome", "bradlc.vscode-tailwindcss"],
+            "settings": {
+                "terminal.integrated.profiles.linux": {
+                    "nushell": {
+                        "path": "/usr/bin/nu"
+                    }
+                },
+                "terminal.integrated.defaultProfile.linux": "nushell",
 
-				"editor.linkedEditing": true,
-				"editor.formatOnPaste": true,
-				"editor.formatOnSave": true,
+                "editor.linkedEditing": true,
+                "editor.formatOnPaste": true,
+                "editor.formatOnSave": true,
 
-				"editor.codeActionsOnSave": {
-					"source.organizeImports.biome": "explicit",
-					"source.fixAll.biome": "explicit"
-				},
+                "editor.codeActionsOnSave": {
+                    "source.organizeImports.biome": "explicit",
+                    "source.fixAll.biome": "explicit"
+                },
 
-				"[typescript]": {
-					"editor.defaultFormatter": "biomejs.biome"
-				},
-				"[typescriptreact]": {
-					"editor.defaultFormatter": "biomejs.biome"
-				},
-				"[json]": {
-					"editor.defaultFormatter": "biomejs.biome"
-				},
-				"[javascript]": {
-					"editor.defaultFormatter": "biomejs.biome"
-				},
-				"[javascriptreact]": {
-					"editor.defaultFormatter": "biomejs.biome"
-				},
+                "[typescript]": {
+                    "editor.defaultFormatter": "biomejs.biome"
+                },
+                "[typescriptreact]": {
+                    "editor.defaultFormatter": "biomejs.biome"
+                },
+                "[json]": {
+                    "editor.defaultFormatter": "biomejs.biome"
+                },
+                "[javascript]": {
+                    "editor.defaultFormatter": "biomejs.biome"
+                },
+                "[javascriptreact]": {
+                    "editor.defaultFormatter": "biomejs.biome"
+                },
 
-				"biome.lsp.bin": "pnpm biome"
-			}
-		}
-	}
+                "biome.lsp.bin": "pnpm biome"
+            }
+        }
+    }
 }
