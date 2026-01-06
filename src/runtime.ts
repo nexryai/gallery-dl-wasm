@@ -1,5 +1,5 @@
 // @ts-ignore: Vite handles ?worker
-import GalleryWorker from "./worker.ts?worker";
+import GalleryWorker from "./worker.js?worker";
 
 export interface DownloadedFile {
     name: string;

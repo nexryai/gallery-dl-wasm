@@ -30,6 +30,7 @@ const GalleryDl: React.FC = () => {
     };
 
     const saveFile = (file: DownloadedFile) => {
+        // @ts-ignore
         const blob = new Blob([file.data]);
         const blobUrl = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -46,7 +47,6 @@ const GalleryDl: React.FC = () => {
             <h2>gallery-dl Web Runner</h2>
 
             <div>
-
                 <div style={{ marginBottom: "10px" }}>
                     <input type="text" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="ターゲットURLを入力 (例: https://...)" style={{ width: "80%", padding: "8px" }} disabled={isLoading} />
                     <button onClick={handleDownload} disabled={isLoading || !url} style={{ padding: "8px 16px", marginLeft: "5px" }}>

@@ -1,24 +1,20 @@
-// @ts-ignore
 import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.mjs";
 
 (function() {
-    const PROXY_PREFIX = "https://cors-anywhere.herokuapp.com/";
+    const WORKER_ENDPOINT = "https://gallery-dl-wasm.nexryai.workers.dev/proxy?url=";
     const originalOpen = XMLHttpRequest.prototype.open;
 
-    // @ts-ignore
     XMLHttpRequest.prototype.open = function(method, url, ...args) {
         let targetUrl = url;
 
         if (typeof targetUrl === 'string' && targetUrl.startsWith('http')) {
-            if (!targetUrl.includes(PROXY_PREFIX) && !targetUrl.includes('cdn.jsdelivr.net')) {
-                targetUrl = PROXY_PREFIX + targetUrl;
+            if (!targetUrl.includes('cdn.jsdelivr.net') && !targetUrl.includes('pyodide.org')) {
+                targetUrl = WORKER_ENDPOINT + encodeURIComponent(targetUrl);
             }
         }
 
-        // @ts-ignore
         return originalOpen.apply(this, [method, targetUrl, ...args]);
     };
-    console.log("XMLHttpRequest hooked for CORS proxy.");
 })();
 
 let pyodideReadyPromise = loadPyodide();
