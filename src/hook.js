@@ -1,4 +1,4 @@
-const WORKER_ENDPOINT = "https://gallery-dl-wasm.nexryai.workers.dev/proxy?url=";
+const WORKER_ENDPOINT = "/proxy?url=";
 const BYPASS_DOMAINS = ["cdn.jsdelivr.net", "pyodide.org", "pypi.org", "files.pythonhosted.org", "workers.dev"];
 
 (function () {
