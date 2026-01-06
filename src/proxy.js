@@ -16,12 +16,26 @@ export default class extends WorkerEntrypoint {
 
         const requestOrigin = request.headers.get("Origin");
         if (!CORS_ALLOWED_DOMAINS.some(domain => requestOrigin?.endsWith(domain))) {
-            return new Response("Not allowed origin", { status: 403 });
+            return new Response("Not allowed origin", { 
+                status: 403,
+                headers: {
+                    "Access-Control-Allow-Origin": requestOrigin,
+                    "Access-Control-Allow-Methods": "*",
+                    "Access-Control-Allow-Headers": "*",
+                }
+            });
         }
 
         const targetUrl = url.searchParams.get("url");
         if (!targetUrl) {
-            return new Response("Missing 'url' parameter", { status: 400 });
+            return new Response("Missing 'url' parameter", { 
+                status: 400,
+                headers: {
+                    "Access-Control-Allow-Origin": requestOrigin,
+                    "Access-Control-Allow-Methods": "*",
+                    "Access-Control-Allow-Headers": "*",
+                }
+            });
         }
 
         try {
@@ -29,7 +43,14 @@ export default class extends WorkerEntrypoint {
 
             const isAllowed = ALLOWED_DOMAINS.some((domain) => parsedTarget.hostname === domain || parsedTarget.hostname.endsWith("." + domain));
             if (!isAllowed) {
-                return new Response("Access to this domain is not allowed", { status: 403 });
+                return new Response("Access to this domain is not allowed", { 
+                    status: 403,
+                    headers: {
+                        "Access-Control-Allow-Origin": requestOrigin,
+                        "Access-Control-Allow-Methods": "*",
+                        "Access-Control-Allow-Headers": "*",
+                    }
+                });
             }
 
             const reqHeaders = new Headers();
@@ -63,7 +84,14 @@ export default class extends WorkerEntrypoint {
                 headers: resHeaders,
             });
         } catch (e) {
-            return new Response("Invalid URL format", { status: 400 });
+            return new Response("Invalid URL", { 
+                status: 400,
+                headers: {
+                    "Access-Control-Allow-Origin": requestOrigin,
+                    "Access-Control-Allow-Methods": "*",
+                    "Access-Control-Allow-Headers": "*",
+                }
+            });
         }
     }
 }
