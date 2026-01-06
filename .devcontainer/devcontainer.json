@@ -1,17 +1,7 @@
 {
     "name": "gallery-dl-wasm",
-    "image": "alpine:edge",
-    "features": {
-        "ghcr.io/MuhmdRaouf/devcontainers-features/alpine-apk:0": {
-            "packages": "nushell,curl,git,nodejs,pnpm",
-            "upgradePackages": true
-        },
-        "ghcr.io/bartventer/arch-devcontainer-features/common-utils:1": {
-            "username": "runner",
-            "userUid": "1000",
-            "userGid": "1000",
-            "configureZshAsDefaultShell": false
-        }
+    "build": {
+        "dockerfile": "./Dockerfile"
     },
     "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
     "workspaceFolder": "/workspace",
