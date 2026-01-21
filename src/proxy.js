@@ -2,7 +2,7 @@ import { WorkerEntrypoint } from "cloudflare:workers";
 
 const ALLOWED_DOMAINS = ["x.com", "reddit.com", "redd.it", "miyoushe.com", "tenor.com", "pixiv.net", "pximg.net"];
 
-const CORS_ALLOWED_DOMAINS = [".app.github.dev"];
+const CORS_ALLOWED_DOMAINS = [".app.github.dev", ".nexryai.workers.dev", "gdl.nexryai.me"];
 
 export default class extends WorkerEntrypoint {
     async fetch(request) {
